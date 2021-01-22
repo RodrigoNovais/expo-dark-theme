@@ -1,13 +1,12 @@
-import React, { Fragment } from 'react'
-import { StatusBar } from 'expo-status-bar'
+import React from 'react'
 
+import ThemeProvider from './src/hooks/theme-provider'
 import Main from './src/pages/Main'
 
 const App: React.FC = () => (
-    <Fragment>
-        <StatusBar style='auto' />
+    <ThemeProvider>
         <Main />
-    </Fragment>
+    </ThemeProvider>
 )
 
 export default App
