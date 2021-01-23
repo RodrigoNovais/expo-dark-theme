@@ -4,11 +4,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Appearance, AppearanceProvider, ColorSchemeName, useColorScheme } from 'react-native-appearance'
 import { StatusBar } from 'expo-status-bar'
 
+export type Themes = 'light' | 'dark'
+export type ThemeOptions = Themes | 'device-default'
+
 export type ThemeContextData = {
-    theme: ColorSchemeName
+    theme: Themes
+    setTheme: (mode: ThemeOptions) => void
 }
 
+const defaultTheme: ThemeOptions = 'device-default'
 const defaultMode: ColorSchemeName = 'light'
+
 const ThemeContext = createContext<ThemeContextData>({} as ThemeContextData)
 
 export const useTheme = () => {
@@ -23,16 +29,18 @@ export const useTheme = () => {
 export const ThemeProvider: React.FC = ({ children }) => {
     const colorScheme = useColorScheme()
 
-    const [theme, setTheme] = useState<ColorSchemeName>(colorScheme === 'no-preference' ? defaultMode : colorScheme)
+    const [theme, setTheme] = useState<Themes>('light')
+    const [userTheme, setUserTheme] = useState<ThemeOptions>(defaultTheme)
+    const [deviceMode, setDeviceMode] = useState<ColorSchemeName>(colorScheme === 'no-preference' ? defaultMode : colorScheme)
 
-    const storeTheme = async (theme: ColorSchemeName) => {
+    const storeTheme = async (theme: Themes) => {
         setTheme(theme)
         await AsyncStorage.setItem('@settings:theme', theme)
     }
 
     useEffect(() => {
         const loadStorageData = async () => {
-            const themeStorage = await AsyncStorage.getItem('@settings:theme') as ColorSchemeName
+            const themeStorage = await AsyncStorage.getItem('@settings:theme') as Themes
             if (!!themeStorage) setTheme(themeStorage)
         }
 
@@ -40,8 +48,14 @@ export const ThemeProvider: React.FC = ({ children }) => {
     }, [])
 
     useEffect(() => {
+        if (userTheme !== 'device-default') storeTheme(userTheme)
+        else if (deviceMode === 'no-preference') storeTheme(defaultMode)
+        else storeTheme(deviceMode)
+    }, [userTheme, deviceMode])
+
+    useEffect(() => {
         const subscription = Appearance.addChangeListener(preferences => {
-            storeTheme(preferences.colorScheme)
+            setDeviceMode(preferences.colorScheme)
         })
 
         return () => subscription.remove()
@@ -49,7 +63,7 @@ export const ThemeProvider: React.FC = ({ children }) => {
 
     return (
         <AppearanceProvider>
-            <ThemeContext.Provider value={{ theme }}>
+            <ThemeContext.Provider value={{ theme, setTheme: setUserTheme }}>
                 <Fragment>
                     <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
                     {children}
