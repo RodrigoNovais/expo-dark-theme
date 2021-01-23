@@ -1,4 +1,5 @@
 import React, { Fragment, createContext, useEffect, useState } from 'react'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import { Appearance, AppearanceProvider, ColorSchemeName, useColorScheme } from 'react-native-appearance'
 import { StatusBar } from 'expo-status-bar'
@@ -24,9 +25,23 @@ export const ThemeProvider: React.FC = ({ children }) => {
 
     const [theme, setTheme] = useState<ColorSchemeName>(colorScheme === 'no-preference' ? defaultMode : colorScheme)
 
+    const storeTheme = async (theme: ColorSchemeName) => {
+        setTheme(theme)
+        await AsyncStorage.setItem('@settings:theme', theme)
+    }
+
+    useEffect(() => {
+        const loadStorageData = async () => {
+            const themeStorage = await AsyncStorage.getItem('@settings:theme') as ColorSchemeName
+            if (!!themeStorage) setTheme(themeStorage)
+        }
+
+        loadStorageData()
+    }, [])
+
     useEffect(() => {
         const subscription = Appearance.addChangeListener(preferences => {
-            setTheme(preferences.colorScheme)
+            storeTheme(preferences.colorScheme)
         })
 
         return () => subscription.remove()
