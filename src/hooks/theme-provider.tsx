@@ -4,6 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Appearance, AppearanceProvider, ColorSchemeName, useColorScheme } from 'react-native-appearance'
 import { StatusBar } from 'expo-status-bar'
 
+import { THEME } from '../constants/settings'
+
 export type Themes = 'light' | 'dark'
 export type ThemeOptions = Themes | 'device-default'
 
@@ -35,12 +37,12 @@ export const ThemeProvider: React.FC = ({ children }) => {
 
     const storeTheme = async (theme: Themes) => {
         setTheme(theme)
-        await AsyncStorage.setItem('@settings:theme', theme)
+        await AsyncStorage.setItem(THEME, theme)
     }
 
     useEffect(() => {
         const loadStorageData = async () => {
-            const themeStorage = await AsyncStorage.getItem('@settings:theme') as Themes
+            const themeStorage = await AsyncStorage.getItem(THEME) as Themes
             if (!!themeStorage) setTheme(themeStorage)
         }
 

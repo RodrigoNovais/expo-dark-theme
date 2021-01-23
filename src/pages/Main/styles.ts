@@ -2,19 +2,7 @@ import { StyleSheet } from 'react-native'
 
 import { Themes } from '../../hooks/theme-provider'
 
-export const light = {
-    backgroundColor: '#F0F0F0',
-    title: '#32264D',
-    link: '#6A6180',
-}
-
-export const dark = {
-    backgroundColor: '#32264D',
-    title: '#F0F0F0',
-    link: '#F0F0F0',
-}
-
-export const themes = { light, dark }
+import { themes } from '../../constants/colors'
 
 export default (theme: Themes) => StyleSheet.create({
     container: {
@@ -48,7 +36,7 @@ export default (theme: Themes) => StyleSheet.create({
     },
 
     links: {
-        color: themes[theme].link,
+        color: themes[theme].text,
         fontSize: 16,
     },
 })
